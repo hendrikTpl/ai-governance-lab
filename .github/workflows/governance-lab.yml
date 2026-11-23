@@ -1,0 +1,15 @@
+# Lab 5 stretch task: push this repository to GitHub and open a pull request.
+name: Governance gate (lab)
+on: [pull_request, workflow_dispatch]
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: bash setup.sh
+      - run: .venv/bin/python -m pytest labs/tests -v --tb=short
+        env:
+          PROXY_GAP: "12000"   # change to 0 and watch the gate turn green

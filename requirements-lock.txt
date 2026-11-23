@@ -1,0 +1,8 @@
+# Exact versions the lab was verified with (Python 3.12, 23 Nov 2026)
+fairlearn==0.15.0
+scikit-learn==1.9.1
+scipy==1.18.1
+pandas==3.1.1
+numpy==2.5.5
+huggingface_hub==2.4.0
+pytest==9.2.0

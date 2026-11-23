@@ -47,7 +47,7 @@ Run one lab at a time with `python labs/lab2_bias.py`, and so on.
 4. Lab 4: your τ, the escalation and override rates it produces, and whether the model needs retraining.
 5. Lab 5: a justified threshold for the precision gap, turning the `xfail` into a real gate.
 
-## Notes for instructors
+## Notes
 
 * The handbook says the loan-audit example will "likely" fail. Reproduced, it **passes** (DI ≈ 0.98): the simulation draws income, credit score and debt ratio independently of gender, so there is no proxy to learn. The bias shows up instead as a precision gap. Lab 2 adds a proxy (`proxy_gap=12000`) to show the failure the handbook describes.
 * The handbook fits `ThresholdOptimizer` on the test set; Lab 2 fits it on training data.

@@ -25,6 +25,145 @@ source .venv/bin/activate
 bash run_all.sh          # all five labs; transcript in out/run_all.log
 ```
 
+- Setup
+[Setup](./docs/setup.sh.png)
+
+- Run Experiments
+[run](./docs/run_all.sh.png)
+
+```
+./run_all.sh 
+
+================================================================
+Lab 1a - a vague model card (what NOT to ship)
+================================================================
+  FLAG Intended Use: only 2 words (min 25)
+  FLAG Out-of-Scope Use: only 1 words (min 25)
+  FLAG Out-of-Scope Use: vague phrase(s) ['n/a']
+  FLAG Training Data: only 2 words (min 25)
+  FLAG Training Data: no numbers - state sizes, rates or gaps
+  FLAG Ethical Considerations: only 6 words (min 25)
+  FLAG Ethical Considerations: vague phrase(s) ['may be biased', 'use with caution']
+  FLAG Limitations: only 1 words (min 25)
+  FLAG Limitations: vague phrase(s) ['various']
+  FLAG Limitations: no numbers - state sizes, rates or gaps
+
+================================================================
+Lab 1b - a specific model card (edit these strings in class)
+================================================================
+  no flags
+Model card saved to /home/hendrik/Documents/supervision/POC/ai-governance-lab/out/MODEL_CARD.md
+
+================================================================
+Lab 1c - datasheet (uses the toolkit example as-is)
+================================================================
+Datasheet saved to DATASHEET.md
+
+Outputs in /home/hendrik/Documents/supervision/POC/ai-governance-lab/out: MODEL_CARD.md, DATASHEET.md
+
+================================================================
+Lab 2a - audit: handbook scenario vs. proxy scenario
+================================================================
+scenario                             acc  DP gap  EO gap     DI  prec F prec M   gate
+A  handbook (no proxy)             0.772   0.006   0.121  0.987   0.628  0.848   PASS
+B  income is a proxy (gap 12k)     0.805   0.235   0.080  0.513   0.700  0.832   FAIL
+
+================================================================
+Lab 2b - mitigate scenario B, then re-audit
+================================================================
+scenario                             acc  DP gap  EO gap     DI  prec F prec M   gate
+B  baseline                        0.805   0.235   0.080  0.513   0.700  0.832   FAIL
+B  in-processing (ExpGradient)     0.762   0.121   0.051  0.704   0.586  0.844   FAIL
+B  post-processing (ThresholdOpt)  0.733   0.038   0.285  0.894   0.552  0.878   PASS
+
+Note: the handbook fits ThresholdOptimizer on the test set; here it is fitted on
+training data so the re-audit is not evaluated on data the mitigator has seen.
+
+================================================================
+Lab 3a - a clean chain verifies
+================================================================
+Chain verified: 5 records, all hashes valid.
+
+================================================================
+Lab 3b - edit one record after the fact
+================================================================
+Hash mismatch at line 3: record has been tampered with
+
+================================================================
+Lab 3c - delete one record
+================================================================
+Chain broken at line 2: expected previous_hash 59cc0ff49e0640dc011fc82646a62b02086a609edda4e1c17d2671168283b744, got 9d034f91d1c3f86961aa72cc61ebcff1372593c3e5762dcee71eb577c526a519
+
+================================================================
+Lab 3d - the restart bug: a new process starts again at 'genesis'
+================================================================
+Chain broken at line 4: expected previous_hash a5440e9d7e092518e0bcd5582b0b7f64da13e088f7379a99353bce365fb17589, got genesis
+
+================================================================
+Lab 3e - fixed: PersistentAuditTrail resumes from the last hash
+================================================================
+Chain verified: 5 records, all hashes valid.
+
+================================================================
+Lab 3f - but an attacker who controls the file can rebuild the whole chain
+================================================================
+Chain verified: 5 records, all hashes valid.
+-> tamper-EVIDENT only against partial edits. Anchor the head hash elsewhere
+   (WORM bucket, separate service, signed checkpoint) to make rewrites detectable.
+
+================================================================
+Lab 4a - is 'confidence' a probability? (validation set)
+================================================================
+raw GBM                Brier 0.1377   ECE 0.0352
+isotonic-calibrated    Brier 0.1364   ECE 0.0252
+reliability (calibrated): 0.05->0.05  0.30->0.31  0.51->0.40  0.68->0.69  0.94->0.97
+
+================================================================
+Lab 4b - sweep tau: escalation rate vs. accuracy of auto-decisions
+================================================================
+  tau  escalated  auto acc
+ 0.60      5.8%     0.820
+ 0.70     35.8%     0.887
+ 0.75     48.3%     0.929
+ 0.80     54.2%     0.958
+ 0.85     57.9%     0.966
+ 0.90     61.2%     0.968
+ 0.95     74.0%     0.974
+
+Chosen tau for ~15% escalation: 0.646
+
+================================================================
+Lab 4c - route the test set through HumanInTheLoop (reviewer = ground truth)
+================================================================
+escalation rate 15.9%   override rate 42.4%
+Handbook rules of thumb: escalation 10-15%; override > 50% means retrain, not re-threshold.
+..x                                                                      [100%]
+=========================== short test summary info ============================
+XFAIL labs/tests/test_lab_gate.py::test_precision_gap_documented - precision gap 0.220: not gated yet - write the decision in the model card
+2 passed, 1 xfailed in 0.71s
+FFx                                                                      [100%]
+=================================== FAILURES ===================================
+E   AssertionError: DI 0.513 < 0.8 - release blocked
+    assert np.float64(0.5130654946734821) >= 0.8
+/home/hendrik/Documents/supervision/POC/ai-governance-lab/labs/tests/test_lab_gate.py:32: AssertionError: DI 0.513 < 0.8 - release blocked
+E   AssertionError: parity gap 0.235 > 0.10 - release blocked
+    assert np.float64(0.2353063391661665) <= 0.1
+/home/hendrik/Documents/supervision/POC/ai-governance-lab/labs/tests/test_lab_gate.py:37: AssertionError: parity gap 0.235 > 0.10 - release blocked
+=========================== short test summary info ============================
+XFAIL labs/tests/test_lab_gate.py::test_precision_gap_documented - precision gap 0.132: not gated yet - write the decision in the model card
+2 failed, 1 xfailed in 0.73s
+
+================================================================
+Lab 5 - CI gate with PROXY_GAP=0
+================================================================
+-> pytest exit code 0: MERGE ALLOWED
+
+================================================================
+Lab 5 - CI gate with PROXY_GAP=12000
+================================================================
+-> pytest exit code 1: MERGE BLOCKED
+```
+
 Windows without WSL: run the commands inside `setup.sh` by hand, using `.venv\Scripts\activate`.
 
 ## The five labs
